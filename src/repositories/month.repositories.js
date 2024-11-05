@@ -34,10 +34,19 @@ async function addWeekRepository(id, weekId, dateStart) {
   );
 }
 
+async function addActionMonthRepository(id) {
+  return Month.findByIdAndUpdate(
+    id,
+    { $inc: { totalActions: 1 } },
+    { new: true }
+  );
+}
+
 export default {
   getMonthByDateRepository,
   findMonthById,
   createMonthRepository,
   addWeekRepository,
   getWeekInMonthRepository,
+  addActionMonthRepository,
 };

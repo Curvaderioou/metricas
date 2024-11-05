@@ -13,7 +13,12 @@ async function createWeekRepository(dateStart, dateEnd) {
   });
 }
 
+async function addActionWeekRepository(id) {
+  return Week.findByIdAndUpdate(id, { $inc: { actions: 1 } }, { new: true });
+}
+
 export default {
   findWeekById,
   createWeekRepository,
+  addActionWeekRepository,
 };

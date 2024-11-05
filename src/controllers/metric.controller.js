@@ -40,9 +40,22 @@ async function updateMetricController(req, res) {
   }
 }
 
+async function addActionMetricController(req, res) {
+  const id = req.params.id;
+  const { data } = req.body;
+  console.log(data);
+  try {
+    const metric = await metricService.addActionMetricService(id, data);
+    return res.status(200).send(metric);
+  } catch (e) {
+    return res.status(400).send(e.message);
+  }
+}
+
 export default {
   getAllMetricController,
   createMetricController,
   updateMetricController,
   getMetricByDateController,
+  addActionMetricController,
 };

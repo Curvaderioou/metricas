@@ -27,7 +27,22 @@ async function findMonthByIdAndDateService(id, dateStart, dateEnd, metricId) {
   if (!month) {
     await weekService.createWeekService(dateStart, dateEnd, metricId);
   }
+  const date = new Date(dateStart).toISOString().split("T")[0];
+  const week = month.weeks.find(
+    (week) => week.dateStart.toISOString().split("T")[0] == date
+  );
+  const weekFound = await weekService.findWeekByIdService(week.weekId);
+  return { monthFound: month, week: weekFound };
 }
+
+// async function findMonthByIdAndDateService(id, dateStart, dateEnd, metricId) {
+//   if (!id || !dateStart || !dateEnd || !metricId)
+//     throw new Error("Missing Parameters");
+//   const month = await monthRepositories.getWeekInMonthRepository(id, dateStart);
+//   if (!month) {
+//     await weekService.createWeekService(dateStart, dateEnd, metricId);
+//   }
+// }
 
 async function createMonthService(dateMonth, year, metricId) {
   if (!dateMonth || !year || !metricId) throw new Error("No dates provided");
@@ -51,10 +66,24 @@ async function addWeekService(id, week, dateStart) {
   return monthAtt;
 }
 
+async function addActionMonthService(id, data) {
+  const monthExists = await monthRepositories.findMonthById(id);
+  if (!monthExists) throw new Error("Month not found");
+  const date = new Date(data).toISOString().split("T")[0];
+  const week = monthExists.weeks.find(
+    (week) => week.dateStart.toISOString().split("T")[0] == date
+  );
+  const response = await weekService.addActionWeekService(week.weekId);
+  if (response) {
+    monthRepositories.addActionMonthRepository(id);
+  }
+}
+
 export default {
   createMonthService,
   getAllMonthService,
   getMonthByDateService,
   addWeekService,
   findMonthByIdAndDateService,
+  addActionMonthService,
 };

@@ -17,6 +17,12 @@ async function getAllWeekService() {
   };
 }
 
+async function findWeekByIdService(id) {
+  const week = await weekRepositories.findWeekById(id);
+  if (!week) throw new Error("Week not found");
+  return week;
+}
+
 async function createWeekService(dateStart, dateEnd, metricId) {
   if (!dateStart || !dateEnd) throw new Error("No dates provided");
   const dateMonth = dateStart.slice(5, 7);
@@ -54,8 +60,17 @@ async function weekChangeActionService(id, action) {
   await weekRepositories.weekChangeAction(action);
 }
 
+async function addActionWeekService(id) {
+  const week = await weekRepositories.findWeekById(id);
+  if (!week) throw new Error("Week not found");
+  await weekRepositories.addActionWeekRepository(id);
+  return true;
+}
+
 export default {
   createWeekService,
   getAllWeekService,
   weekChangeActionService,
+  addActionWeekService,
+  findWeekByIdService,
 };

@@ -42,13 +42,28 @@ async function getMetricByDateService(data) {
     }
   }
 
+  await Promise.all(
+    metricsDate.filteredMetrics.map(async (metric) => {
+      const response = await monthService.findMonthByIdAndDateService(
+        metric.months[metric.months.length - 1].monthId,
+        data,
+        dateEnd,
+        metric._id
+      );
+
+      if (!metric.responses) {
+        metric.responses = [];
+      }
+
+      metric.responses.push(response);
+    })
+  );
+
   metricsDate.filteredMetrics.forEach((metric) => {
-    monthService.findMonthByIdAndDateService(
-      metric.months[metric.months.length - 1].monthId,
-      data,
-      dateEnd,
-      metric._id
-    );
+    metric.responses.forEach((response) => {
+      console.log("Mês encontrado:", response.monthFound);
+      console.log("Semana encontrada:", response.week);
+    });
   });
 
   return {
@@ -56,6 +71,7 @@ async function getMetricByDateService(data) {
       id: metric._id,
       name: metric.name,
       months: metric.months,
+      monthWeek: metric.responses,
     })),
   };
 }
@@ -74,6 +90,18 @@ async function updateMetricService(id, name) {
   return newMetric;
 }
 
+async function addActionMetricService(id, data) {
+  if (!data) throw new Error("Data not sent");
+  const ano = Number(data.slice(0, 4));
+  const mes = Number(data.slice(5, 7));
+  const metric = await metricRepositories.findMetricById(id);
+  if (!metric) throw new Error("Metric not found");
+  const mesAchado = metric.months.find(
+    (month) => month.month === mes && month.year === ano
+  );
+  await monthService.addActionMonthService(mesAchado.monthId, data);
+}
+
 async function addMonthService(id, monthId, dateMonth, year) {
   const metric = await metricRepositories.addMonthRepository(
     id,
@@ -89,4 +117,5 @@ export default {
   updateMetricService,
   addMonthService,
   getMetricByDateService,
+  addActionMetricService,
 };
